@@ -1,0 +1,18 @@
+Package: unisomadbx
+Title: Lib auxiliar para integracao com a plataforma de dados da Unisoma 
+Version: 0.0.0.9000
+Authors@R: 
+    person(given = "Alberto",
+           family = "Pereto",
+           role = c("aut", "cre"),
+           email = "alberto.pereto@unisoma.com",
+           comment = c(ORCID = "YOUR-ORCID-ID"))
+Description: Funcoes para auxiliar o desenvolvimento R da UniSoma.
+License: `use_mit_license()`
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.1
+Imports:
+	data.table (>= 1.9.4),
+	dplyr
