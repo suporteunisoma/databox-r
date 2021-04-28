@@ -4,13 +4,11 @@
 #' UniSoma e retorna para a funcao R na forma de uma estrutura de dados
 #' apropriada.
 #'
-#' @param infile Path to the input file
-#' @return A matrix of the infile
+#' @param entity_catalog id of data catalog entity
+#' @return A matrix of the entity_catalog
 #' @export
-load_data <- function(infile){
-  in.dt <- data.table::fread(infile, header = TRUE)
-  in.dt <- in.dt[!duplicated(in.dt[, 1]), ]
-  in.mat <- as.matrix(in.dt[, -1, with = FALSE])
-  rownames(in.mat) <- unlist(in.dt[, 1, with = FALSE])
-  in.mat
+load_data <- function(entity_catalog){
+  path <- paste("https://raw.githubusercontent.com/suporteunisoma/databox-r/main/", entity_catalog, ".csv", sep="")
+  df <- read.csv2(path, sep=",", dec=".")
+  df
 }
