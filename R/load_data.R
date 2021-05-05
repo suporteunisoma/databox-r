@@ -8,7 +8,7 @@
 #' @return A matrix of the entity_catalog
 #' @export
 load_data <- function(entity_catalog){
-  path <- paste("https://github.com/suporteunisoma/databox-r/raw/c943edd1ad740d9199fd0a10dbbcb2a2b7038b9b/", entity_catalog, ".csv", sep="")
+  path <- paste("https://raw.githubusercontent.com/suporteunisoma/databox-r/c943edd1ad740d9199fd0a10dbbcb2a2b7038b9b/", entity_catalog, ".csv", sep="")
   df <- read.csv2(path, sep=",", dec=".")
   df
 }
