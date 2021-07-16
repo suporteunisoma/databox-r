@@ -23,7 +23,7 @@ load_meta_data <- function(entity_catalog) {
   # obtem os metadados para acesso ao dado requisitado
   sql_args <- "select ea.arg_name, ea.arg_value, s.name as source
                from dbx_source_engine_arg ea
-        inner join dbx_source_engine se on (ea.source_engine_id = se.source_id)
+        inner join dbx_source_engine se on (ea.source_engine_id = se.id)
                        inner join dbx_catalog c on (c.source_engine_id = se.id)
                                inner join dbx_source s on (s.id = se.source_id)
               where c.entity=?"
@@ -52,6 +52,7 @@ load_jdbc_data <- function(jdbc_args, entity_metadata, entity_catalog){
   jdbc_driver_path <- ""
   jdbc_sql <- ""
 
+
   for (i in 1:nrow(jdbc_args)) {
     arg_name <- jdbc_args[i,1]
     arg_value <- jdbc_args[i,2]
@@ -60,9 +61,11 @@ load_jdbc_data <- function(jdbc_args, entity_metadata, entity_catalog){
       jdbc_driver <- arg_value
 
       if (str_detect(jdbc_driver, "sqlite")) {
-        jdbc_driver_path = "/home/sqlite-jdbc-3.34.0.jar"
+        jdbc_driver_path = "lib/sqlite-jdbc-3.34.0.jar"
       } else if (str_detect(jdbc_driver, "postgresql")){
-        jdbc_driver_path = "/home/postgresql.jar"
+        jdbc_driver_path = "lib/postgresql.jar"
+      } else if (str_detect(jdbc_driver, "jtds")) {
+        jdbc_driver_path = "lib/jtds.jar"
       }
 
     } else if (arg_name=="JDBC_HOST") {
@@ -75,8 +78,12 @@ load_jdbc_data <- function(jdbc_args, entity_metadata, entity_catalog){
       jdbc_sql <- arg_value
     }
   }
+  print(jdbc_driver)
+  print(jdbc_driver_path)
 
   drv <- RJDBC::JDBC(jdbc_driver, jdbc_driver_path)
+  print(jdbc_driver_path)
+  print(drv)
   conn <- RJDBC::dbConnect(drv, jdbc_host, jdbc_user, jdbc_pwd)
 
   # roda a consulta
