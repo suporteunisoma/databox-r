@@ -12,7 +12,7 @@ load_meta_data <- function(entity_catalog) {
 
   if (dbx_driver=="") {
     dbx_driver = "org.sqlite.JDBC"
-    dbx_driver_path = "/home/sqlite-jdbc-3.34.0.jar"
+    dbx_driver_path = "lib/sqlite-jdbc-3.34.0.jar"
     dbx_driver_host = "jdbc:sqlite:/home/data_box.db"
     dbx_driver_user = "unisoma"
     dbx_driver_pwd = ""
@@ -52,7 +52,6 @@ load_jdbc_data <- function(jdbc_args, entity_metadata, entity_catalog){
   jdbc_driver_path <- ""
   jdbc_sql <- ""
 
-
   for (i in 1:nrow(jdbc_args)) {
     arg_name <- jdbc_args[i,1]
     arg_value <- jdbc_args[i,2]
@@ -78,17 +77,12 @@ load_jdbc_data <- function(jdbc_args, entity_metadata, entity_catalog){
       jdbc_sql <- arg_value
     }
   }
-  print(jdbc_driver)
-  print(jdbc_driver_path)
 
   drv <- RJDBC::JDBC(jdbc_driver, jdbc_driver_path)
-  print(jdbc_driver_path)
-  print(drv)
   conn <- RJDBC::dbConnect(drv, jdbc_host, jdbc_user, jdbc_pwd)
 
   # roda a consulta
-  fields <- extract_fields(entity_metadata)
-  result_set <- dbGetQuery(conn, paste("select", fields, "from", jdbc_sql, sep=" "))
+  result_set <- dbGetQuery(conn, paste(jdbc_sql, sep=" "))
 
   return(result_set)
 }
@@ -114,19 +108,4 @@ load_csv_url_data <- function(csv_args, entity_metadata, entity_catalog){
 
   df <- read.csv2(csv_url, sep=csv_sep, dec='.')
   return(df)
-}
-
-#' Gera uma string contendo os campos de uma tabela
-#'
-#' @param entity_metadata estrutura de dados com as colunas da entidade
-#' @return string contendo os campos separados por virgula
-extract_fields <- function(entity_metadata){
-  fields <- ""
-  for (i in 1:nrow(entity_metadata)) {
-    if (fields!=""){
-      fields <- paste(fields, ", ", sep="")
-    }
-    fields <- paste(fields, entity_metadata[i,2], sep="")
-  }
-  return(fields)
 }

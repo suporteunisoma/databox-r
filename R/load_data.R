@@ -13,12 +13,18 @@ load_data <- function(entity_catalog){
   md <- load_meta_data(entity_catalog)
   source <- md$entity_args[1,3]
 
-  #para cada tipo de 'source' acessa os dados de diferentes maneiras
-  if (source=="JDBC_SOURCE") {
-    result = load_jdbc_data(md$entity_args, md$entity_definition, entity_catalog)
-  } else if (source=="CSV_URL_SOURCE") {
-    result = load_csv_url_data(md$entity_args, md$entity_definition, entity_catalog)
-  }
+  if (is.na(source)) {
+    print(paste(entity_catalog, "nao encontrado no catalogo", sep=" "))
 
-  return(result)
+  } else {
+
+        #para cada tipo de 'source' acessa os dados de diferentes formas...
+    if (source=="JDBC_SOURCE") {
+      result = load_jdbc_data(md$entity_args, md$entity_definition, entity_catalog)
+    } else if (source=="CSV_URL_SOURCE") {
+      result = load_csv_url_data(md$entity_args, md$entity_definition, entity_catalog)
+    }
+
+    return(result)
+  }
 }
