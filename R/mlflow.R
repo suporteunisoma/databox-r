@@ -6,6 +6,7 @@
 #'
 #' @param experiment_name nome unico do experimento MLFlow
 #' @return id da rodada necessario para finalizacao da publicacao no MLFlow
+#' @export
 start_mlflow <- function(experiment_name){
 
   library(mlflow)
@@ -42,6 +43,7 @@ start_mlflow <- function(experiment_name){
 #'
 #' @param df_artfact DataFrame com dados a serem salvos como um artefato
 #' @param file_path_artfact caminho do arquivo de artefato a ser salvo
+#' @export
 save_artifact <- function(run_obj, df_artfact=NULL, file_path_artfact=NULL){
 
   run_obj=d
@@ -78,6 +80,7 @@ save_artifact <- function(run_obj, df_artfact=NULL, file_path_artfact=NULL){
 #' @param df_parameter DataFrame de tags contendo as colunas: params e values
 #' @param df_metric DataFrame de metricas contendo: params e values
 #' @param final_status string com status final do MLFlow. Use MLFlowStatusEnum
+#' @export
 finish_mlflow <- function(run_obj, df_parameter=NULL, df_metric=NULL, final_status){
 
   library(mlflow)
@@ -142,6 +145,7 @@ checkExperiment <- function(experiment_name, client){
 #' MLFlowStatusEnum()$FINISHED
 #'
 #' @return string contendo um dos status esperados pelo MLFlow
+#' @export
 MLFlowStatusEnum <- function() {
   list(FINISHED = "FINISHED", FAILED = "FAILED", KILLED = "KILLED")
 }
