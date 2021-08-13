@@ -1,4 +1,3 @@
-
 #' Inicia publicacao no MLFlow
 #'
 #' Tipicamente esta funcao deve ser posicionada no inicio do script R para

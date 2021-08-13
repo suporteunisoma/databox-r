@@ -4,13 +4,13 @@
 \alias{load_data}
 \title{Carrega dados de um dataset}
 \usage{
-load_data(infile)
+load_data(entity_catalog)
 }
 \arguments{
-\item{infile}{Path to the input file}
+\item{entity_catalog}{id of data catalog entity}
 }
 \value{
-A matrix of the infile
+dados coletada da base fonte segundo o catalogo
 }
 \description{
 Esta funcao carrega um dataset mapeados no Catalogo de Dados da plataforma
