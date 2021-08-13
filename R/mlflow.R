@@ -43,11 +43,12 @@ start_mlflow <- function(experiment_name){
 #' @param df_artfact DataFrame com dados a serem salvos como um artefato
 #' @param file_path_artfact caminho do arquivo de artefato a ser salvo
 #' @export
-save_artifact <- function(run_obj, df_artfact=NULL, file_path_artfact=NULL){
+save_artifact <- function(run_obj, df_artifact=NULL, file_path_artifact=NULL){
 
-  run_obj=d
-  df_artfact=df
-  file_path_artfact="/tmp/7bc1380e-fc5b-11eb-a0f6-0242ac130002.csv"
+  # valores utilizados nos testes...
+  #run_obj=d
+  #df_artifact=df
+  #file_path_artifact="/tmp/7bc1380e-fc5b-11eb-a0f6-0242ac130002.csv"
 
   library(mlflow)
   library(readr)
@@ -56,14 +57,14 @@ save_artifact <- function(run_obj, df_artfact=NULL, file_path_artfact=NULL){
   # conecta no servidor MLFlow e retorna um objeto client MLFlow
   client_obj <- mlflow_client(tracking_uri = "http://192.168.7.234:5000/")
 
-  if (missing(file_path_artfact)==FALSE)  {
-    mlflow_log_artifact(file_path_artfact, run_id=run_obj$run_uuid, client=client_obj)
+  if (missing(file_path_artifact)==FALSE)  {
+    mlflow_log_artifact(file_path_artifact, run_id=run_obj$run_uuid, client=client_obj)
   }
 
-  if (missing(df_artfact)==FALSE)  {
+  if (missing(df_artifact)==FALSE)  {
     uuid_str = UUIDgenerate(use.time=TRUE, n=1)
     df_path = paste("/tmp/",uuid_str,".csv", sep="")
-    write_csv(df_artfact, df_path)
+    write_csv(df_artifact, df_path)
     mlflow_log_artifact(df_path, run_id=run_obj$run_uuid, client=client_obj)
     file.remove(df_path) # limpa arquivos csv da pasta temporaria
   }

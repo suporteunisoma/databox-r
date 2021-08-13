@@ -4,7 +4,7 @@
 \alias{save_artifact}
 \title{Salva artefato no repositorio do MLFLow}
 \usage{
-save_artifact(run_obj, df_artfact = NULL, file_path_artfact = NULL)
+save_artifact(run_obj, df_artifact = NULL, file_path_artifact = NULL)
 }
 \arguments{
 \item{df_artfact}{DataFrame com dados a serem salvos como um artefato}
