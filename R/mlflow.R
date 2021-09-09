@@ -22,7 +22,7 @@ start_mlflow <- function(experiment_name){
 
   # se o experimento ainda nao existir, cria um novo registro
   if (exp_id==0) {
-    mlflow_create_experiment(name=experiment_name, client = client_obj)
+    exp_id = mlflow_create_experiment(name=experiment_name, client = client_obj)
   }
 
   # cria uma nova rodada
@@ -48,24 +48,37 @@ save_artifact <- function(run_obj, df_artifact=NULL, file_path_artifact=NULL){
   # valores utilizados nos testes...
   #run_obj=d
   #df_artifact=df
-  #file_path_artifact="/tmp/7bc1380e-fc5b-11eb-a0f6-0242ac130002.csv"
+  #file_path_artifact="/tmp/texlive-profile.txt"
 
   library(mlflow)
   library(readr)
   library(uuid)
 
-  # conecta no servidor MLFlow e retorna um objeto client MLFlow
-  client_obj <- mlflow_client(tracking_uri = "http://192.168.7.234:5000/")
+  # define URI do servidor MLFlow
+  Sys.setenv(MLFLOW_TRACKING_URI = "http://192.168.7.234:5000/")
 
   if (missing(file_path_artifact)==FALSE)  {
-    mlflow_log_artifact(file_path_artifact, run_id=run_obj$run_uuid, client=client_obj)
+    system("mlflow --version")
+    command <- paste("mlflow artifacts log-artifact","--local-file",
+                     file_path_artifact, "--run-id", run_obj$run_uuid,
+                     #"--artifact-uri", "ftp://userftp:amosinU987@192.168.7.234/artefatos/25",
+                     sep=" ")
+    system(command)
+    #mlflow_log_artifact(file_path_artifact, run_id=run_obj$run_uuid, client=client_obj)
   }
 
   if (missing(df_artifact)==FALSE)  {
+    system("mlflow --version")
     uuid_str = UUIDgenerate(use.time=TRUE, n=1)
     df_path = paste("/tmp/",uuid_str,".csv", sep="")
     write_csv(df_artifact, df_path)
-    mlflow_log_artifact(df_path, run_id=run_obj$run_uuid, client=client_obj)
+    command <- paste("mlflow artifacts log-artifact","--local-file", df_path,
+                     "--run-id", run_obj$run_uuid,
+                     #"--artifact-uri", "ftp://userftp:amosinU987@192.168.7.234/artefatos/25",
+                     sep=" ")
+    system(command)
+
+    #mlflow_log_artifact(df_path, run_id=run_obj$run_uuid, client=client_obj)
     file.remove(df_path) # limpa arquivos csv da pasta temporaria
   }
 
@@ -122,7 +135,7 @@ finish_mlflow <- function(run_obj, df_parameter=NULL, df_metric=NULL, final_stat
 checkExperiment <- function(experiment_name, client){
 
   exper_list <- mlflow_list_experiments(
-    view_type = c("ACTIVE_ONLY", "DELETED_ONLY", "ALL"),
+    view_type = c("ALL"),
     client = client
   )
 
@@ -131,6 +144,11 @@ checkExperiment <- function(experiment_name, client){
     row <- exper_list[i,]
     if (row$name==experiment_name) {
       exp_id = row$experiment_id
+
+      if (row$lifecycle_stage=="deleted") {
+        mlflow_restore_experiment(exp_id, client)
+      }
+
     }
   }
 
