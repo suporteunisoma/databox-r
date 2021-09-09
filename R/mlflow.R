@@ -10,9 +10,6 @@ start_mlflow <- function(experiment_name){
 
   library(mlflow)
 
-  # valores utilizados nos testes...
-  #experiment_name <- "meu_teste_do_R"
-
   # conecta no servidor MLFlow e retorna um objeto client MLFlow
   client_obj <- mlflow_client(tracking_uri = "http://192.168.7.234:5000/")
 
@@ -45,11 +42,6 @@ start_mlflow <- function(experiment_name){
 #' @export
 save_artifact <- function(run_obj, df_artifact=NULL, file_path_artifact=NULL){
 
-  # valores utilizados nos testes...
-  #run_obj=d
-  #df_artifact=df
-  #file_path_artifact="/tmp/texlive-profile.txt"
-
   library(mlflow)
   library(readr)
   library(uuid)
@@ -61,10 +53,8 @@ save_artifact <- function(run_obj, df_artifact=NULL, file_path_artifact=NULL){
     system("mlflow --version")
     command <- paste("mlflow artifacts log-artifact","--local-file",
                      file_path_artifact, "--run-id", run_obj$run_uuid,
-                     #"--artifact-uri", "ftp://userftp:amosinU987@192.168.7.234/artefatos/25",
                      sep=" ")
     system(command)
-    #mlflow_log_artifact(file_path_artifact, run_id=run_obj$run_uuid, client=client_obj)
   }
 
   if (missing(df_artifact)==FALSE)  {
@@ -74,11 +64,8 @@ save_artifact <- function(run_obj, df_artifact=NULL, file_path_artifact=NULL){
     write_csv(df_artifact, df_path)
     command <- paste("mlflow artifacts log-artifact","--local-file", df_path,
                      "--run-id", run_obj$run_uuid,
-                     #"--artifact-uri", "ftp://userftp:amosinU987@192.168.7.234/artefatos/25",
                      sep=" ")
     system(command)
-
-    #mlflow_log_artifact(df_path, run_id=run_obj$run_uuid, client=client_obj)
     file.remove(df_path) # limpa arquivos csv da pasta temporaria
   }
 
