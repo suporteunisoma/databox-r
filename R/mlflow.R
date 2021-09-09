@@ -11,7 +11,11 @@ start_mlflow <- function(experiment_name){
   library(mlflow)
 
   # conecta no servidor MLFlow e retorna um objeto client MLFlow
-  client_obj <- mlflow_client(tracking_uri = "http://192.168.7.234:5000/")
+  mlflow_track_uri <- Sys.getenv("MLFLOW_TRACKING_URI")
+  if (mlflow_track_uri=="") {
+    mlflow_track_uri = "http://192.168.7.234:5000/"
+  }
+  client_obj <- mlflow_client(tracking_uri = mlflow_track_uri)
 
   # coleta os experimentos do MLFlow e verifica se o nome do experimento
   # enviado por parametro já existe.
@@ -47,7 +51,10 @@ save_artifact <- function(run_obj, df_artifact=NULL, file_path_artifact=NULL){
   library(uuid)
 
   # define URI do servidor MLFlow
-  Sys.setenv(MLFLOW_TRACKING_URI = "http://192.168.7.234:5000/")
+  mlflow_track_uri <- Sys.getenv("MLFLOW_TRACKING_URI")
+  if (mlflow_track_uri=="") {
+    Sys.setenv(MLFLOW_TRACKING_URI = "http://192.168.7.234:5000/")
+  }
 
   if (missing(file_path_artifact)==FALSE)  {
     system("mlflow --version")
@@ -86,7 +93,11 @@ finish_mlflow <- function(run_obj, df_parameter=NULL, df_metric=NULL, final_stat
   library(mlflow)
 
   # conecta no servidor MLFlow e retorna um objeto client MLFlow
-  client_obj <- mlflow_client(tracking_uri = "http://192.168.7.234:5000/")
+  mlflow_track_uri <- Sys.getenv("MLFLOW_TRACKING_URI")
+  if (mlflow_track_uri=="") {
+    mlflow_track_uri = "http://192.168.7.234:5000/"
+  }
+  client_obj <- mlflow_client(tracking_uri = mlflow_track_uri)
 
   # salva a lista de parametros do modelo
   if (missing(df_parameter)==FALSE)  {
