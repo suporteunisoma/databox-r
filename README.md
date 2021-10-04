@@ -15,6 +15,7 @@ UniSoma.
 o Rstudio) utilize o comando abaixo:
    * install.packages("devtools")
    * install.packages("roxygen2")
+   * install.packages("RJDBC")
 * Em seguida digite o comando para instalar a biblioteca UniSoma
    * devtools::install_github("suporteunisoma/databox-r")
 * O proprio devtools irá verificar a ultima versoes das dependencias.
