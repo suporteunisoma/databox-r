@@ -12,10 +12,10 @@ load_meta_data <- function(entity_catalog) {
 
   if (dbx_driver=="") {
     dbx_driver = "org.sqlite.JDBC"
-    dbx_driver_path = "lib/sqlite-jdbc-3.34.0.jar"
-    dbx_driver_host = "jdbc:sqlite:/home/data_box.db"
-    dbx_driver_user = "unisoma"
-    dbx_driver_pwd = ""
+    dbx_driver_path = "lib/postgresql.jar"
+    dbx_driver_host = "jdbc:postgresql://192.168.7.221:5432/databox"
+    dbx_driver_user = "postgres"
+    dbx_driver_pwd = "databox"
   }
   drv <- RJDBC::JDBC(dbx_driver, dbx_driver_path)
   conn <- RJDBC::dbConnect(drv, dbx_driver_host, dbx_driver_user, dbx_driver_pwd)
