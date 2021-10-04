@@ -8,7 +8,7 @@
 #' @return dados coletada da base fonte segundo o catalogo
 #' @export
 load_data <- function(entity_catalog){
-  source("R/extractor.R", encoding="UTF8")
+  #source("R/extractor.R", encoding="UTF8")
 
   md <- load_meta_data(entity_catalog)
   source <- md$entity_args[1,3]
