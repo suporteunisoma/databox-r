@@ -11,7 +11,7 @@ load_meta_data <- function(entity_catalog) {
   dbx_driver_pwd <- Sys.getenv("DATA_BOX_JDBC_PWD")
 
   if (dbx_driver=="") {
-    dbx_driver = "org.sqlite.JDBC"
+    dbx_driver = "org.postgresql.Driver"
     dbx_driver_path = "lib/postgresql.jar"
     dbx_driver_host = "jdbc:postgresql://192.168.7.221:5432/databox"
     dbx_driver_user = "postgres"
