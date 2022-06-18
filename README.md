@@ -13,12 +13,15 @@ UniSoma.
 
 * Uma vez que você esteja com o seu ambiente R configurado (tipicamente usando
 o Rstudio) utilize o comando abaixo:
-   * install.packages("devtools")
-   * install.packages("roxygen2")
-   * install.packages("RJDBC")
+   * install.packages('DBI')
+   * install.packages('RJDBC')
+   * install.packages('remotes')
+   * install.packages('stringr')
+   * install.packages('mlflow')
+   * install.packages('readr')
+   * install.packages('uuid')
 * Em seguida digite o comando para instalar a biblioteca UniSoma
-   * devtools::install_github("suporteunisoma/databox-r")
-* O proprio devtools irá verificar a ultima versoes das dependencias.
+   * remotes::install_github('suporteunisoma/databox-r')
 
 ### Contatos ###
 
