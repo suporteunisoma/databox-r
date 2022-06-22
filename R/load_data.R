@@ -9,74 +9,26 @@
 #' @export
 load_data <- function(entity_catalog){
 
-  md <- load_meta_data(entity_catalog)
-  source <- md$entity_args[1,3]
+  access_token <- dbx_authenticate()
+  dados <- dbx_call_service(access_token = access_token, entity = entity_catalog)
+  source <- dados$entity_source
 
   if (is.na(source)) {
     print(paste(entity_catalog, "nao encontrado no catalogo", sep=" "))
 
   } else {
 
-        #para cada tipo de 'source' acessa os dados de diferentes formas...
+    #para cada tipo de 'source' acessa os dados de diferentes formas...
     if (source=="JDBC_SOURCE") {
-      result = load_jdbc_data(md$entity_args, entity_catalog)
+      result = load_jdbc_data(dados$entity_args, entity_catalog)
     } else if (source=="CSV_URL_SOURCE") {
-      result = load_csv_url_data(md$entity_args, entity_catalog)
+      result = load_csv_url_data(dados$entity_args, entity_catalog)
     }
 
     return(result)
   }
 }
 
-
-load_meta_data_rest <- function(entity_catalog) {
-  access_token <- dbx_authenticate()
-  dbx_call_service(access_token = access_token, entity = entity_catalog)
-}
-
-
-load_meta_dataload_meta_data <- function(entity_catalog) {
-  library(DBI)
-  library(rJava)
-  library(RJDBC)
-
-  dbx_driver <- Sys.getenv("DATA_BOX_JDBC_DRIVER")
-  dbx_driver_path <- Sys.getenv("DATA_BOX_JDBC_LIB_PATH")
-  dbx_driver_host <- Sys.getenv("DATA_BOX_JDBC_HOST")
-  dbx_driver_user <- Sys.getenv("DATA_BOX_JDBC_USER")
-  dbx_driver_pwd <- Sys.getenv("DATA_BOX_JDBC_PWD")
-
-  if (dbx_driver=="") {
-    dbx_driver = "org.postgresql.Driver"
-    dbx_driver_path = "lib/postgresql.jar"
-    dbx_driver_host = "jdbc:postgresql://192.168.7.221:5432/databox"
-    dbx_driver_user = "postgres"
-    dbx_driver_pwd = "databox"
-  }
-  drv <- RJDBC::JDBC(dbx_driver, dbx_driver_path)
-  conn <- RJDBC::dbConnect(drv, dbx_driver_host, dbx_driver_user, dbx_driver_pwd)
-
-  # obtem os metadados para acesso ao dado requisitado
-  sql_args <- "select ea.arg_name, ea.arg_value, s.name as source
-               from dbx_source_engine_arg ea
-        inner join dbx_source_engine se on (ea.source_engine_id = se.id)
-                       inner join dbx_catalog c on (c.source_engine_id = se.id)
-                               inner join dbx_source s on (s.id = se.source_id)
-              where c.entity=?"
-  eargs <- dbGetQuery(conn, sql_args, entity_catalog)
-
-  # obtem os metadados para acesso ao dado requisitado
-  sql_defin <- "select cc.id, cc.name, cc.col_type, cc.is_not_null
-                from dbx_catalog c
-                inner join dbx_catalog_column cc on (cc.catalog_id = c.id)
-                where c.entity=? and cc.is_active=1"
-  edefn <- dbGetQuery(conn, sql_defin, entity_catalog)
-
-  # retorna dois objetos: (a) os argumentos para se conectar na fonte dos dados
-  # e (b) a definicao dos metadados da entidade.
-  return(list(entity_args = eargs, entity_definition = edefn))
-
-}
 
 load_jdbc_data <- function(jdbc_args, entity_catalog){
   library(stringr)
@@ -130,9 +82,9 @@ load_csv_url_data <- function(csv_args, entity_catalog){
   csv_sep <- ""
   csv_dec_sep <- ""
 
-  for (i in 1:nrow(csv_args)) {
-    arg_name <- csv_args[i,1]
-    arg_value <- csv_args[i,2]
+  for (i in 1:ncol(csv_args)) {
+    arg_name <- csv_args[1,i]
+    arg_value <- csv_args[2,i]
 
     if (arg_name=="CSV_URL") {
       csv_url <- arg_value
