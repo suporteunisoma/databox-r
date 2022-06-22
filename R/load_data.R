@@ -19,9 +19,9 @@ load_data <- function(entity_catalog){
 
         #para cada tipo de 'source' acessa os dados de diferentes formas...
     if (source=="JDBC_SOURCE") {
-      result = load_jdbc_data(md$entity_args, md$entity_definition, entity_catalog)
+      result = load_jdbc_data(md$entity_args, entity_catalog)
     } else if (source=="CSV_URL_SOURCE") {
-      result = load_csv_url_data(md$entity_args, md$entity_definition, entity_catalog)
+      result = load_csv_url_data(md$entity_args, entity_catalog)
     }
 
     return(result)
@@ -29,8 +29,13 @@ load_data <- function(entity_catalog){
 }
 
 
+load_meta_data_rest <- function(entity_catalog) {
+  access_token <- dbx_authenticate()
+  dbx_call_service(access_token = access_token, entity = entity_catalog)
+}
 
-load_meta_data <- function(entity_catalog) {
+
+load_meta_dataload_meta_data <- function(entity_catalog) {
   library(DBI)
   library(rJava)
   library(RJDBC)
@@ -73,7 +78,7 @@ load_meta_data <- function(entity_catalog) {
 
 }
 
-load_jdbc_data <- function(jdbc_args, entity_metadata, entity_catalog){
+load_jdbc_data <- function(jdbc_args, entity_catalog){
   library(stringr)
 
   jdbc_driver <- ""
@@ -118,7 +123,8 @@ load_jdbc_data <- function(jdbc_args, entity_metadata, entity_catalog){
   return(result_set)
 }
 
-load_csv_url_data <- function(csv_args, entity_metadata, entity_catalog){
+
+load_csv_url_data <- function(csv_args, entity_catalog){
 
   csv_url <- ""
   csv_sep <- ""
@@ -141,3 +147,48 @@ load_csv_url_data <- function(csv_args, entity_metadata, entity_catalog){
   return(df)
 }
 
+dbx_call_service <- function(access_token, entity) {
+  library(httr)
+  library(jsonlite)
+  auth <- paste("Bearer", access_token,sep=' ')
+  res <- POST(paste("http://192.168.0.25:8080/databox/api/metadata/findMetaDataArgsByCatalog/",entity, sep=''),
+              add_headers(Authorization = auth, "accept"="application/json", "content-type"="application/json"))
+  if (res$status_code==200) {
+    json_content <- rawToChar(res$content)
+    ret <- fromJSON(json_content)
+    cols <- Reduce('+', lengths(ret$argName))
+    mtx <- matrix(rbind(ret$argName, ret$argValue), ncol=cols)
+
+    source <- ret$sourceEngine$source$name[1]
+
+    # retorna dois objetos: (a) os argumentos para se conectar na fonte dos dados
+    # e (b) o tipo da fonte de dados
+    return(list(entity_args = mtx, entity_source = source))
+
+  } else {
+    return (NULL)
+  }
+
+}
+
+
+dbx_authenticate <- function() {
+  library(httr)
+  library(jsonlite)
+  access_token <- ""
+
+  login <- list(
+    grant_type = "password",
+    username = "unisoma",
+    password = "unisoma"
+  )
+  auth <- "Basic SUQtQzIzMjMzQUEtQUI2Ri00REI0LUE2NEQtQjVFRDI0Nzk2NDJBOiRjZDY3OWYyMDczNGM0NzUxOGQ1NTQ1MTgwNjNlMTRkZg=="
+  res <- POST("http://192.168.7.221:8080/authorization/oauth/token",
+              add_headers(Authorization = auth ),
+              body = login)
+  if (res$status_code==200) {
+    json_content <- rawToChar(res$content)
+    access_token <- fromJSON(json_content)$access_token
+  }
+  return(access_token)
+}
