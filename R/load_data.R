@@ -8,66 +8,24 @@
 #' @return dados coletada da base fonte segundo o catalogo
 #' @export
 load_data <- function(entity_catalog){
-
   access_token <- dbx_authenticate()
-  dados <- dbx_call_service(access_token = access_token, entity = entity_catalog)
-  source <- dados$entity_source
-
-  if (is.na(source)) {
-    print(paste(entity_catalog, "nao encontrado no catalogo", sep=" "))
-
-  } else {
-
-    #para cada tipo de 'source' acessa os dados de diferentes formas...
-    if (source=="JDBC_SOURCE") {
-      result = load_jdbc_data(dados$entity_args, entity_catalog)
-    } else if (source=="CSV_URL_SOURCE") {
-      result = load_csv_url_data(dados$entity_args, entity_catalog)
-    }
-
-    return(result)
-  }
+  result = load_trino_data(entity_catalog)
+  return(result)
 }
 
 
-load_jdbc_data <- function(jdbc_args, entity_catalog){
-  library(stringr)
+load_trino_data <- function(entity_catalog){
+  library(rJava)
+  library(RJDBC)
 
-  jdbc_driver <- ""
-  jdbc_host <- ""
-  jdbc_user <- ""
+  jdbc_host <- "jdbc:trino://192.168.7.221:8080/"
+  jdbc_user <- "AlbertoPereto"
   jdbc_pwd <- ""
-  jdbc_driver_path <- ""
-  jdbc_sql <- ""
+  jdbc_sql <- "select * from postgresql.public_dataset.bi_projeto"
 
-  for (i in 1:nrow(jdbc_args)) {
-    arg_name <- jdbc_args[i,1]
-    arg_value <- jdbc_args[i,2]
-
-    if (arg_name=="JDBC_DRIVER") {
-      jdbc_driver <- arg_value
-
-      if (str_detect(jdbc_driver, "sqlite")) {
-        jdbc_driver_path = "lib/sqlite-jdbc-3.34.0.jar"
-      } else if (str_detect(jdbc_driver, "postgresql")){
-        jdbc_driver_path = "lib/postgresql.jar"
-      } else if (str_detect(jdbc_driver, "jtds")) {
-        jdbc_driver_path = "lib/jtds.jar"
-      }
-
-    } else if (arg_name=="JDBC_HOST") {
-      jdbc_host <- arg_value
-    } else if (arg_name=="JDBC_PWD") {
-      jdbc_pwd <- arg_value
-    } else if (arg_name=="JDBC_USER") {
-      jdbc_user <- arg_value
-    } else if (arg_name=="JDBC_SQL") {
-      jdbc_sql <- arg_value
-    }
-  }
-
-  drv <- RJDBC::JDBC(jdbc_driver, jdbc_driver_path)
-  conn <- RJDBC::dbConnect(drv, jdbc_host, jdbc_user, jdbc_pwd)
+  drv <- RJDBC::JDBC("org.postgresql.Driver", "lib/postgresql.jar")
+  drv <- RJDBC::JDBC("io.trino.jdbc.TrinoDriver", "lib/trino-jdbc-393.jar")
+  conn <- RJDBC::dbConnect(trino_driver, jdbc_host, jdbc_user, jdbc_pwd)
 
   # roda a consulta
   result_set <- dbGetQuery(conn, paste(jdbc_sql, sep=" "))
@@ -76,52 +34,50 @@ load_jdbc_data <- function(jdbc_args, entity_catalog){
 }
 
 
-load_csv_url_data <- function(csv_args, entity_catalog){
+#load_csv_url_data <- function(csv_args, entity_catalog){
+#
+#  csv_url <- ""
+#  csv_sep <- ""
+#  csv_dec_sep <- ""
+#
+#  for (i in 1:ncol(csv_args)) {
+#    arg_name <- csv_args[1,i]
+#    arg_value <- csv_args[2,i]
+#
+#    if (arg_name=="CSV_URL") {
+#      csv_url <- arg_value
+#    } else if (arg_name=="CSV_SEPARATOR") {
+#      csv_sep <- arg_value
+#    } else if (arg_name=="CSV_DECIMAL_SEP") {
+#      csv_dec_sep <- arg_value
+#    }
+#  }
+#
+#  df <- read.csv2(csv_url, sep=csv_sep, dec='.')
+#  return(df)
+#}
 
-  csv_url <- ""
-  csv_sep <- ""
-  csv_dec_sep <- ""
-
-  for (i in 1:ncol(csv_args)) {
-    arg_name <- csv_args[1,i]
-    arg_value <- csv_args[2,i]
-
-    if (arg_name=="CSV_URL") {
-      csv_url <- arg_value
-    } else if (arg_name=="CSV_SEPARATOR") {
-      csv_sep <- arg_value
-    } else if (arg_name=="CSV_DECIMAL_SEP") {
-      csv_dec_sep <- arg_value
-    }
-  }
-
-  df <- read.csv2(csv_url, sep=csv_sep, dec='.')
-  return(df)
-}
-
-dbx_call_service <- function(access_token, entity) {
-  library(httr)
-  library(jsonlite)
-  auth <- paste("Bearer", access_token,sep=' ')
-  res <- POST(paste("http://192.168.0.25:9092/databox/api/metadata/findMetaDataArgsByCatalog/",entity, sep=''),
-              add_headers(Authorization = auth, "accept"="application/json", "content-type"="application/json"))
-  if (res$status_code==200) {
-    json_content <- rawToChar(res$content)
-    ret <- fromJSON(json_content)
-    cols <- Reduce('+', lengths(ret$argName))
-    mtx <- matrix(rbind(ret$argName, ret$argValue), ncol=cols)
-
-    source <- ret$sourceEngine$source$name[1]
-
+#dbx_call_service <- function(access_token, entity) {
+#  library(httr)
+#  library(jsonlite)
+#  #entity = "bi_projeto"
+#  auth <- paste("Bearer", access_token,sep=' ')
+#  res <- POST(paste("http://192.168.7.221:9092/databox/api/metadata/findMetaDataArgsByCatalog/",entity, sep=''),
+#              add_headers(Authorization = auth, "accept"="application/json", "content-type"="application/json"))
+#  if (res$status_code==200) {
+#    json_content <- rawToChar(res$content)
+#    ret <- fromJSON(json_content)
+#    cols <- Reduce('+', lengths(ret$argName))
+#    mtx <- matrix(rbind(ret$argName, ret$argValue), ncol=cols)
+#    source <- ret$sourceEngine$source$name[1]
     # retorna dois objetos: (a) os argumentos para se conectar na fonte dos dados
     # e (b) o tipo da fonte de dados
-    return(list(entity_args = mtx, entity_source = source))
-
-  } else {
-    return (NULL)
-  }
-
-}
+#    return(list(entity_args = mtx, entity_source = source))
+#  } else {
+#    return (NULL)
+#  }
+#
+#}
 
 
 dbx_authenticate <- function() {
