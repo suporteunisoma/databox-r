@@ -103,7 +103,7 @@ dbx_call_service <- function(access_token, entity) {
   library(httr)
   library(jsonlite)
   auth <- paste("Bearer", access_token,sep=' ')
-  res <- POST(paste("http://192.168.0.25:8080/databox/api/metadata/findMetaDataArgsByCatalog/",entity, sep=''),
+  res <- POST(paste("http://192.168.0.25:9092/databox/api/metadata/findMetaDataArgsByCatalog/",entity, sep=''),
               add_headers(Authorization = auth, "accept"="application/json", "content-type"="application/json"))
   if (res$status_code==200) {
     json_content <- rawToChar(res$content)
@@ -135,7 +135,7 @@ dbx_authenticate <- function() {
     password = "unisoma"
   )
   auth <- "Basic SUQtQzIzMjMzQUEtQUI2Ri00REI0LUE2NEQtQjVFRDI0Nzk2NDJBOiRjZDY3OWYyMDczNGM0NzUxOGQ1NTQ1MTgwNjNlMTRkZg=="
-  res <- POST("http://192.168.7.221:8080/authorization/oauth/token",
+  res <- POST("http://192.168.7.221:9092/authorization/oauth/token",
               add_headers(Authorization = auth ),
               body = login)
   if (res$status_code==200) {
