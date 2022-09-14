@@ -4,58 +4,32 @@
 #' UniSoma e retorna para a funcao R na forma de uma estrutura de dados
 #' apropriada.
 #'
-#' @param entity_catalog id of data catalog entity
+#' @param entity_catalog nome do item do catalogo
 #' @return dados coletada da base fonte segundo o catalogo
 #' @export
 load_data <- function(entity_catalog){
+
+  #faz autenticacao no DataBOX
   access_token <- dbx_authenticate()
-  result = load_trino_data(entity_catalog)
+
+  #TODO requisita do DataBOX os dados referentes ao Catalogo
+
+  #Faz a carga dos dados via chamada python
+  load_trino_data(entity_catalog)
+
+  #TODO retorna dados a partir de RDS volatil
+
   return(result)
 }
 
 
 load_trino_data <- function(entity_catalog){
-  library(rJava)
-  library(RJDBC)
 
-  jdbc_host <- "jdbc:trino://192.168.7.221:8080/"
-  jdbc_user <- "AlbertoPereto"
-  jdbc_pwd <- ""
-  jdbc_sql <- "select * from postgresql.public_dataset.bi_projeto"
+  #TODO chama rotina python
 
-  drv <- RJDBC::JDBC("org.postgresql.Driver", "lib/postgresql.jar")
-  drv <- RJDBC::JDBC("io.trino.jdbc.TrinoDriver", "lib/trino-jdbc-393.jar")
-  conn <- RJDBC::dbConnect(trino_driver, jdbc_host, jdbc_user, jdbc_pwd)
-
-  # roda a consulta
-  result_set <- dbGetQuery(conn, paste(jdbc_sql, sep=" "))
-
-  return(result_set)
+  return(TRUE)
 }
 
-
-#load_csv_url_data <- function(csv_args, entity_catalog){
-#
-#  csv_url <- ""
-#  csv_sep <- ""
-#  csv_dec_sep <- ""
-#
-#  for (i in 1:ncol(csv_args)) {
-#    arg_name <- csv_args[1,i]
-#    arg_value <- csv_args[2,i]
-#
-#    if (arg_name=="CSV_URL") {
-#      csv_url <- arg_value
-#    } else if (arg_name=="CSV_SEPARATOR") {
-#      csv_sep <- arg_value
-#    } else if (arg_name=="CSV_DECIMAL_SEP") {
-#      csv_dec_sep <- arg_value
-#    }
-#  }
-#
-#  df <- read.csv2(csv_url, sep=csv_sep, dec='.')
-#  return(df)
-#}
 
 #dbx_call_service <- function(access_token, entity) {
 #  library(httr)
