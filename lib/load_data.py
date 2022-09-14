@@ -23,7 +23,9 @@ source_df = spark.read.format("jdbc") \
 .option("driver","io.trino.jdbc.TrinoDriver") \
 .option("url", "jdbc:trino://192.168.7.221:8080/postgresql/public_dataset") \
 .option("query", "select * from bi_aloca_equipe") \
-.option("user", 'unisoma').option("password", '').load()
+.option("user", 'unisoma') \
+.option("password", '') \
+.load()
 print("======= TRINO connection established =======")
 
 #pyreadr.write_rdata("~/test.RData", source_df.toPandas(), df_name="bi_aloca_equipe")
