@@ -9,49 +9,47 @@
 #' @export
 load_data <- function(entity_catalog){
 
-  #faz autenticacao no DataBOX
+  #entity_catalog <- "bi_projeto"
+  #faz autenticacao no DataBOX e coleta o SQL apropriado
   access_token <- dbx_authenticate()
+  meta_data_sql <- dbx_call_service(access_token, entity_catalog)
 
-  #TODO requisita do DataBOX os dados referentes ao Catalogo
+  file <- "~/dump.Rds"
+  if (file.exists(file)) {
+    unlink(file)
+  }
 
-  #Faz a carga dos dados via chamada python
-  load_trino_data(entity_catalog)
+  #requisita do DataBOX os dados referentes ao Catalogo
+  setwd("~/spark/spark-3.3.0-bin-hadoop2/")
+  system(paste("/bin/python3", "~/databox-r/lib/load_data.py", paste("'",meta_data_sql, "'", sep=''), sep=' '),
+      intern = FALSE, ignore.stdout = FALSE, ignore.stderr = FALSE, wait=FALSE
+  )
 
-  #TODO retorna dados a partir de RDS volatil
+  #retorna dados a partir de RDS volatil
+  result <- readRDS(file)
 
   return(result)
 }
 
 
-load_trino_data <- function(entity_catalog){
 
-  #TODO chama rotina python
+dbx_call_service <- function(access_token, entity_catalog) {
+  library(httr)
+  library(jsonlite)
 
-  return(TRUE)
+  auth <- paste("Bearer", access_token, sep=' ')
+  res <- POST(paste("http://192.168.7.221:9091/databox/api/metadata/findMetaDataByCatalogName/", entity_catalog, sep=''),
+              add_headers(Authorization = auth, "accept"="application/json", "content-type"="application/json"))
+  if (res$status_code==200) {
+    json_content <- rawToChar(res$content)
+    ret <- fromJSON(json_content)
+    sql <- ret$entityQuery
+    return (sql)
+  } else {
+    return (NULL)
+  }
+
 }
-
-
-#dbx_call_service <- function(access_token, entity) {
-#  library(httr)
-#  library(jsonlite)
-#  #entity = "bi_projeto"
-#  auth <- paste("Bearer", access_token,sep=' ')
-#  res <- POST(paste("http://192.168.7.221:9092/databox/api/metadata/findMetaDataArgsByCatalog/",entity, sep=''),
-#              add_headers(Authorization = auth, "accept"="application/json", "content-type"="application/json"))
-#  if (res$status_code==200) {
-#    json_content <- rawToChar(res$content)
-#    ret <- fromJSON(json_content)
-#    cols <- Reduce('+', lengths(ret$argName))
-#    mtx <- matrix(rbind(ret$argName, ret$argValue), ncol=cols)
-#    source <- ret$sourceEngine$source$name[1]
-    # retorna dois objetos: (a) os argumentos para se conectar na fonte dos dados
-    # e (b) o tipo da fonte de dados
-#    return(list(entity_args = mtx, entity_source = source))
-#  } else {
-#    return (NULL)
-#  }
-#
-#}
 
 
 dbx_authenticate <- function() {
