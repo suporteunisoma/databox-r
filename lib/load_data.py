@@ -5,10 +5,10 @@ import pyreadr
 import sys
 import os
 
-#os.environ["SPARK_HOME"] = "~/spark/spark-3.3.0-bin-hadoop2/"
+#os.environ["SPARK_HOME"] = "~/.local/"
 
 print("import executed")
-conf = SparkConf().set("spark.jars", "../../databox-r/lib/trino-jdbc-393.jar") \
+conf = SparkConf().set("spark.jars", "../databox-r/lib/trino-jdbc-393.jar") \
                   .set("spark.executor.memory", "1G") \
                   .set("spark.eventlog.enabled", "true") \
                   .set("spark.eventlog.dir", r"/app/") \

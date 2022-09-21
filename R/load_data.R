@@ -20,7 +20,7 @@ load_data <- function(entity_catalog){
   }
 
   #requisita do DataBOX os dados referentes ao Catalogo
-  setwd("~/spark/spark-3.3.0-bin-hadoop2/")
+  setwd("~/.local/")
   system(paste("/bin/python3", "~/databox-r/lib/load_data.py", paste("'",meta_data_sql, "'", sep=''), sep=' '),
       intern = FALSE, ignore.stdout = FALSE, ignore.stderr = FALSE, wait=FALSE
   )
