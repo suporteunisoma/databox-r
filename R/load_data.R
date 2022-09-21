@@ -14,22 +14,25 @@ load_data <- function(entity_catalog){
   access_token <- dbx_authenticate()
   meta_data_sql <- dbx_call_service(access_token, entity_catalog)
 
-  file <- "~/dump.Rds"
-  if (file.exists(file)) {
-    unlink(file)
+  dumpFile <- "~/dump.Rds"
+  if (file.exists(dumpFile)) {
+    unlink(dumpFile)
   }
 
   #requisita do DataBOX os dados referentes ao Catalogo
   setwd("~/.local/")
-  system(paste("/bin/python3", "~/databox-r/lib/load_data.py", paste("'",meta_data_sql, "'", sep=''), sep=' '),
+  system(paste("/bin/python3", "/opt/trino/load_data.py", paste("'",meta_data_sql, "'", sep=''), sep=' '),
       intern = FALSE, ignore.stdout = FALSE, ignore.stderr = FALSE, wait=FALSE
   )
 
   #retorna dados a partir de RDS volatil
-  result <- readRDS(file)
+  result <- readRDS(dumpFile)
+
+
 
   return(result)
 }
+
 
 
 
