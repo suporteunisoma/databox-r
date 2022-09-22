@@ -9,22 +9,26 @@
 #' @export
 load_data <- function(entity_catalog){
 
-  #entity_catalog <- "bi_projeto"
-  #faz autenticacao no DataBOX e coleta o SQL apropriado
-  access_token <- dbx_authenticate()
-  meta_data_sql <- dbx_call_service(access_token, entity_catalog)
-
+  print("Removing dump file...")
   dumpFile <- "~/dump.Rds"
   if (file.exists(dumpFile)) {
     unlink(dumpFile)
   }
 
+  print("Accessing DataBox...")
+  #entity_catalog <- "bi_projeto"
+  #faz autenticacao no DataBOX e coleta o SQL apropriado
+  access_token <- dbx_authenticate()
+  meta_data_sql <- dbx_call_service(access_token, entity_catalog)
+
   #requisita do DataBOX os dados referentes ao Catalogo
+  print("Collecting data...")
   setwd("~/.local/")
   system(paste("/bin/python3", "/opt/trino/load_data.py", paste("'",meta_data_sql, "'", sep=''), sep=' '),
-      intern = FALSE, ignore.stdout = FALSE, ignore.stderr = FALSE, wait=FALSE
+      intern = TRUE, ignore.stdout = FALSE, ignore.stderr = FALSE
   )
 
+  print("Convert RDS to Dataset...")
   #retorna dados a partir de RDS volatil
   result <- readRDS(dumpFile)
 
