@@ -132,9 +132,10 @@ finish_mlflow <- function(run_obj, df_parameter=NULL, df_metric=NULL, final_stat
 #' @return id do experimento do MLFlow ou 0 caso nao exista
 checkExperiment <- function(experiment_name, client){
 
-  exper_list <- mlflow_list_experiments(
-    view_type = c("ALL"),
+  //executa method da API R do MLFLOW para puxar os expercimentos disponiveis
+  exper_list <- mlflow_client_list_experiments(
     client = client
+    view_type = c("ALL"),
   )
 
   exp_id = 0
