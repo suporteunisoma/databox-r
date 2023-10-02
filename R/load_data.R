@@ -32,8 +32,6 @@ load_data <- function(entity_catalog){
   #retorna dados a partir de RDS volatil
   result <- readRDS(dumpFile)
 
-
-
   return(result)
 }
 
@@ -44,13 +42,15 @@ dbx_call_service <- function(access_token, entity_catalog) {
   library(httr)
   library(jsonlite)
 
+  print("Call Dbx service...")
   auth <- paste("Bearer", access_token, sep=' ')
-  res <- POST(paste("http://192.168.7.221:9091/databox/api/metadata/findMetaDataByCatalogName/", entity_catalog, sep=''),
+  res <- POST(paste("http://192.168.7.221:9091/databox/api/dbxmetadata/findMetaDataByCatalogName/", entity_catalog, sep=''),
               add_headers(Authorization = auth, "accept"="application/json", "content-type"="application/json"))
   if (res$status_code==200) {
     json_content <- rawToChar(res$content)
     ret <- fromJSON(json_content)
     sql <- ret$entityQuery
+    print("SQL clause extracted...")
     return (sql)
   } else {
     return (NULL)
@@ -64,6 +64,7 @@ dbx_authenticate <- function() {
   library(jsonlite)
   access_token <- ""
 
+  print("Dbx Authentication...")
   login <- list(
     grant_type = "password",
     username = "unisoma",
@@ -75,6 +76,7 @@ dbx_authenticate <- function() {
               body = login)
   if (res$status_code==200) {
     json_content <- rawToChar(res$content)
+    print("Access token extracted...")
     access_token <- fromJSON(json_content)$access_token
   }
   return(access_token)
