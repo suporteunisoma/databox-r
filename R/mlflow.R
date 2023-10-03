@@ -121,7 +121,8 @@ finish_mlflow <- function(run_obj, df_parameter=NULL, df_metric=NULL, final_stat
 #' @param client objeto contendo o MLFlow client
 #' @return id do experimento do MLFlow ou 0 caso nao exista
 checkExperiment <- function(experiment_name, mlflow_client){
-
+  
+  print(experiment_name)
   exp_id <- NULL
   try(
       exp_id <- mlflow::mlflow_get_experiment(name=experiment_name)
