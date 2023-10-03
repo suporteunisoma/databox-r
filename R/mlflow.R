@@ -129,6 +129,7 @@ checkExperiment <- function(experiment_name, mlflow_client){
   print(exp_id)
 
   if (is.null(exp_id)) {
+      print("Creating a new experiment...")
       expId <- mlflow::mlflow_create_experiment(experiment_name,
         client = mlflow_client
       )
